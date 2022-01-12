@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xml>
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%date{dd MMM yyyy HH:mm:ss.SSS} %-4relative [%thread] %-5level %logger{35} %L : %msg%n
+            </pattern>
+        </encoder>
+    </appender>
+
+    <timestamp key="byDay" datePattern="yyyyMMdd'T'HHmmss" />
+
+    <appender name="FILE"
+        class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${user.home}/logs/randy-log-${byDay}.txt </file>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- daily rollover -->
+            <fileNamePattern>${user.home}/logs/randy.%d{yyyy-MM-dd}.%i.txt
+            </fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy
+                class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <!-- or whenever the file size reaches 100MB -->
+                <maxFileSize>5MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <maxHistory>3</maxHistory>
+        </rollingPolicy>
+
+        <encoder>
+            <pattern>%date{dd MMM yyyy HH:mm:ss.SSS} %-4relative [%thread] %-5level %logger{35} %L : %msg%n
+            </pattern>
+        </encoder>
+    </appender>
+
+    <logger name="ch.qos.logback" additivity="false" level="WARN">
+        <appender-ref ref="STDOUT" />
+        <appender-ref ref="FILE" />
+    </logger>
+    <logger name="org.springframework.web.filter.CommonsRequestLoggingFilter" additivity="false" level="DEBUG">
+        <appender-ref ref="STDOUT" />
+        <appender-ref ref="FILE" />
+    </logger>
+    <logger name="org.springframework" additivity="false" level="ERROR">
+        <appender-ref ref="FILE" />
+        <appender-ref ref="STDOUT" />
+    </logger>
+    <logger name="org.hibernate" additivity="false" level="DEBUG">
+        <appender-ref ref="FILE" />
+        <appender-ref ref="STDOUT" />
+    </logger>
+    <logger name="org.hibernate.SQL" additivity="false" level="TRACE">
+        <appender-ref ref="FILE" />
+        <appender-ref ref="DDL" />
+        <appender-ref ref="STDOUT" />
+    </logger>
+    <logger name="org.hibernate.type" additivity="false" level="TRACE">
+        <appender-ref ref="FILE" />
+        <appender-ref ref="STDOUT" />
+    </logger>
+    <logger name="com.zaxxer" additivity="false" level="ERROR">
+        <appender-ref ref="FILE" />
+    </logger>
+    <logger name="org.apache.camel" additivity="false" level="ERROR">
+        <appender-ref ref="FILE" />
+    </logger>
+    <logger name="org.xnio" additivity="false" level="ERROR">
+        <appender-ref ref="FILE" />
+    </logger>
+    <logger name="io.undertow" additivity="false" level="ERROR">
+        <appender-ref ref="FILE" />
+    </logger>
+    <logger name="org.jboss" additivity="false" level="ERROR">
+        <appender-ref ref="FILE" />
+    </logger>
+    <logger name="org.apache.kafka" additivity="false" level="INFO">
+        <appender-ref ref="FILE" />
+    </logger>
+    <logger name="org.asynchttpclient" additivity="false" level="WARN">
+        <appender-ref ref="FILE" />
+    </logger>
+    <logger name="io.netty" additivity="false" level="WARN">
+        <appender-ref ref="FILE" />
+    </logger>
+    <logger name="net.ljcomputing" additivity="false" level="DEBUG">
+        <appender-ref ref="FILE" />
+        <appender-ref ref="STDOUT" />
+    </logger>
+
+    <root value="INFO">
+        <appender-ref ref="STDOUT" />
+        <appender-ref ref="FILE" />
+    </root>
+</configuration>

@@ -1,0 +1,192 @@
+plugins {
+    id 'java'
+    id 'maven-publish'
+    id 'eclipse'
+    id "io.freefair.lombok" version "6.3.0"
+    id 'com.github.sherter.google-java-format' version '0.9'
+    id 'checkstyle'
+    id 'com.github.spotbugs' version '5.0.0-rc.1'
+    id 'pmd'
+    id 'de.aaschmid.cpd' version '3.1'
+    id 'org.sonatype.gradle.plugins.scan' version '2.2.0'
+    id 'jacoco'
+    id 'project-report'
+    id 'build-dashboard'
+    id 'ru.vyarus.mkdocs' version '2.2.0'
+}
+
+group = 'net.ljcomputing'
+version = '1.0.0-SNAPSHOT'
+description = 'Randy Data - Java Random Data Generator.'
+java.sourceCompatibility = JavaVersion.VERSION_1_8
+
+repositories {
+    mavenLocal()
+
+    maven {
+        url = uri('http://localhost:8081/repository/maven-central')
+        allowInsecureProtocol = true
+    }
+}
+
+configurations {
+    umlDoclet
+    integrationTestCompile.extendsFrom testCompile
+    integrationTestRuntime.extendsFrom testRuntime
+}
+
+dependencies {
+    implementation 'org.slf4j:slf4j-api:1.7.32'
+    implementation 'ch.qos.logback:logback-core:1.2.7'
+    implementation 'ch.qos.logback:logback-classic:1.2.7'
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.13.1'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.13.1'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.1'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.13.1'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.1'
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.13.1'
+    implementation 'org.apache.commons:commons-lang3:3.12.0'
+    testImplementation 'org.testng:testng:7.4.0'
+    umlDoclet 'nl.talsmasoftware:umldoclet:2.0.15'
+    spotbugsPlugins 'com.h3xstream.findsecbugs:findsecbugs-plugin:1.11.0'
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    
+    manifest {
+        attributes "Main-Class": "net.ljcomputing.randy.store.cli.StoreCli"
+    }
+
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from(components.java)
+        }
+    }
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+javadoc {
+    source = delombok
+    failOnError = false
+    //source = sourceSets.main.allJava
+    options.memberLevel = JavadocMemberLevel.PRIVATE
+    options.docletpath = configurations.umlDoclet.files.asType(List)
+    options.doclet = "nl.talsmasoftware.umldoclet.UMLDoclet"
+}
+
+cpdCheck {
+    source = sourceSets.main.allJava
+    ignoreFailures = true
+
+    reports {
+        text.enabled = true;
+    }
+}
+
+checkstyle {
+    toolVersion = '9.2'
+    configFile = file("${rootDir}/configuration/checkstyle.xml")
+    maxWarnings = 0
+    ignoreFailures = true
+}
+checkstyleMain {
+    source ='src/main/java'
+}
+checkstyleTest {
+    source ='src/test/java'
+}
+
+tasks.withType(Checkstyle) {
+    reports {
+        xml.required = true
+        html.required = true
+    }
+}
+
+spotbugs {
+    ignoreFailures = true
+    showStackTraces = true
+    showProgress = true
+    effort = 'default'
+    excludeFilter = file("${rootDir}/configuration/spotbugs-exclude.xml")
+}
+
+spotbugsMain {
+    reports {
+        html {
+            required = true
+            destination = file("$buildDir/reports/spotbugs/main/spotbugs.html")
+            stylesheet = 'fancy-hist.xsl'
+        }
+    }
+}
+
+pmd {
+    ignoreFailures = true
+    consoleOutput = true
+}
+
+pmdMain {
+    reports {
+        xml.enabled = true
+        html.enabled = true
+    }
+}
+
+ossIndexAudit {
+    username = 'willmorejg@gmail.com'
+    password = 'Wiomm$001'
+    allConfigurations = false
+    useCache = true
+    cacheExpiration = 'PT12H'
+    dependencyGraph = true
+}
+
+jacoco {
+    toolVersion = "0.8.7"
+}
+
+jacocoTestReport {
+    dependsOn test
+}
+
+test {
+    finalizedBy jacocoTestReport
+    testLogging.showStandardStreams = true
+    useTestNG()
+}
+
+def incrementVersion = tasks.register('incrementVersion') {
+    doFirst {
+        boolean isSnapshot = version.indexOf("-SNAPSHOT") != -1
+        def v = version.replace("-SNAPSHOT", "")
+        def ver = v
+        String lastNumber = ver.substring(ver.lastIndexOf('.') + 1)
+        int increment = lastNumber.toInteger() + 1
+        String firstNumber = ver.substring(0, ver.lastIndexOf("."))
+        String newVersion = "version = '" + firstNumber + "." + increment + (isSnapshot ? "-SNAPSHOT" : "") + "'"
+        println "new version: [" + newVersion + "]"
+        String result = buildFile.getText().replaceFirst("version = '$version'",newVersion)
+        buildFile.setText(result)
+    }
+}
