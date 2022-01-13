@@ -13,7 +13,7 @@ import net.ljcomputing.randy.factory.BuiltinStoresFactory;
 import net.ljcomputing.randy.model.impl.GenericMap;
 import net.ljcomputing.randy.model.impl.GenericString;
 import net.ljcomputing.randy.reader.Reader;
-import net.ljcomputing.randy.reader.impl.JsonReader;
+import net.ljcomputing.randy.reader.impl.JsonInputStreamReader;
 import net.ljcomputing.randy.store.exception.StoreException;
 import net.ljcomputing.randy.store.impl.GenericMapStoreImpl;
 import net.ljcomputing.randy.store.impl.GenericStringStoreImpl;
@@ -49,7 +49,7 @@ public class StoreTest {
             "resources",
             "stores",
             "maleGivenNames.json");
-    final Reader reader = new JsonReader("file:" + path.toString());
+    final Reader reader = new JsonInputStreamReader("file:" + path.toString());
 
     try {
       final GenericStringStore store = new GenericStringStoreImpl(reader);
@@ -58,7 +58,7 @@ public class StoreTest {
       logger.error("Test failed: ", e1);
     }
 
-    final Reader readerFail = new JsonReader("file:" + path.toString() + "x");
+    final Reader readerFail = new JsonInputStreamReader("file:" + path.toString() + "x");
     GenericStringStore storeFail = null;
     try {
       storeFail = new GenericStringStoreImpl(readerFail);
@@ -91,9 +91,27 @@ public class StoreTest {
 
     new ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(path.toFile(), list);
 
-    final Reader reader = new JsonReader("file:" + path.toString());
+    final Reader reader = new JsonInputStreamReader("file:" + path.toString());
     final GenericMapStore store = new GenericMapStoreImpl(reader);
     final String result = store.retrieve().getValue().get("firstName").toString();
+    Assert.assertNotNull(result);
+  }
+
+  @Test
+  void testHttpStore() throws StoreException {
+    final Reader reader =
+        new JsonInputStreamReader("http://localhost/~jim/json/femaleGivenNames.json");
+    final GenericStringStore store = new GenericStringStoreImpl(reader);
+    final String result = store.retrieve().getValue();
+    Assert.assertNotNull(result);
+  }
+
+  @Test
+  void testHttpsStore() throws StoreException {
+    final Reader reader =
+        new JsonInputStreamReader("https://localhost/~jim/json/maleGivenNames.json");
+    final GenericStringStore store = new GenericStringStoreImpl(reader);
+    final String result = store.retrieve().getValue();
     Assert.assertNotNull(result);
   }
 }

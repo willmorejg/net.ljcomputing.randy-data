@@ -10,8 +10,8 @@ import net.ljcomputing.randy.factory.ResourceFactory;
 import net.ljcomputing.randy.reader.Reader;
 import net.ljcomputing.randy.reader.exception.ReaderException;
 
-/** JSON file reader implementation. */
-public class JsonReader extends AbstractReader implements Reader {
+/** JSON input stream reader implementation. */
+public class JsonInputStreamReader extends AbstractReader implements Reader {
   /** The Jackson type reference definition. */
   public static final TypeReference<List<Map<String, Object>>> TYPE_REF =
       new TypeReference<List<Map<String, Object>>>() {};
@@ -21,7 +21,7 @@ public class JsonReader extends AbstractReader implements Reader {
    *
    * @param resourceDefinition the definition of the resource
    */
-  public JsonReader(final String resourceDefinition) {
+  public JsonInputStreamReader(final String resourceDefinition) {
     super(resourceDefinition);
   }
 
@@ -36,7 +36,7 @@ public class JsonReader extends AbstractReader implements Reader {
     final URI resource = URI.create(resourceDefinition);
 
     try (final InputStream storeFile =
-        ResourceFactory.getByScheme(resource.getScheme()).getInputStream(resource.getPath())) {
+        ResourceFactory.getByScheme(resource.getScheme()).getInputStream(resource)) {
       return jsonToList(storeFile);
     } catch (Exception e) {
       throw new ReaderException("Failed to retrieve resource into list of maps", e);

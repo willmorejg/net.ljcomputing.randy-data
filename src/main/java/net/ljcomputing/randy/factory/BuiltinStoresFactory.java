@@ -11,7 +11,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import net.ljcomputing.randy.model.Model;
 import net.ljcomputing.randy.reader.Reader;
-import net.ljcomputing.randy.reader.impl.JsonReader;
+import net.ljcomputing.randy.reader.impl.JsonInputStreamReader;
 import net.ljcomputing.randy.store.Store;
 import net.ljcomputing.randy.store.exception.StoreException;
 import net.ljcomputing.randy.store.impl.GenericStringStoreImpl;
@@ -55,7 +55,7 @@ public class BuiltinStoresFactory {
    */
   private static void load(final String storeName) throws StoreException {
     final String definition = String.format("jar:/stores/%s.json", storeName);
-    final Reader reader = new JsonReader(definition);
+    final Reader reader = new JsonInputStreamReader(definition);
 
     try {
       stores.put(storeName, new GenericStringStoreImpl(reader));
