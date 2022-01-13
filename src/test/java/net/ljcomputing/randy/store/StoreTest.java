@@ -116,4 +116,45 @@ public class StoreTest {
     logger.debug("result: {}", result);
     Assert.assertNotNull(result);
   }
+
+  @Test
+  void testStoreFailure() throws StoreException {
+    String result = null;
+
+    try {
+      final Reader reader =
+          new JsonInputStreamReader("http://localhost/~jim/json/femaleGivenNames.jso");
+      final GenericStringStore store = new GenericStringStoreImpl(reader);
+      result = store.retrieve().getValue();
+    } catch (Exception e) {
+      logger.error("Test failed: ", e);
+    }
+
+    logger.debug("result: {}", result);
+    Assert.assertNull(result);
+
+    try {
+      final Reader reader =
+          new JsonInputStreamReader("https://localhost/~jim/json/femaleGivenNames.jso");
+      final GenericStringStore store = new GenericStringStoreImpl(reader);
+      result = store.retrieve().getValue();
+    } catch (Exception e) {
+      logger.error("Test failed: ", e);
+    }
+
+    logger.debug("result: {}", result);
+    Assert.assertNull(result);
+
+    try {
+      final Reader reader =
+          new JsonInputStreamReader("htt://localhost/~jim/json/femaleGivenNames.jso");
+      final GenericStringStore store = new GenericStringStoreImpl(reader);
+      result = store.retrieve().getValue();
+    } catch (Exception e) {
+      logger.error("Test failed: ", e);
+    }
+
+    logger.debug("result: {}", result);
+    Assert.assertNull(result);
+  }
 }
