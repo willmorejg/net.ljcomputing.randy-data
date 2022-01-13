@@ -94,6 +94,7 @@ public class StoreTest {
     final Reader reader = new JsonInputStreamReader("file:" + path.toString());
     final GenericMapStore store = new GenericMapStoreImpl(reader);
     final String result = store.retrieve().getValue().get("firstName").toString();
+    logger.debug("result: {}", result);
     Assert.assertNotNull(result);
   }
 
@@ -103,15 +104,16 @@ public class StoreTest {
         new JsonInputStreamReader("http://localhost/~jim/json/femaleGivenNames.json");
     final GenericStringStore store = new GenericStringStoreImpl(reader);
     final String result = store.retrieve().getValue();
+    logger.debug("result: {}", result);
     Assert.assertNotNull(result);
   }
 
   @Test
   void testHttpsStore() throws StoreException {
-    final Reader reader =
-        new JsonInputStreamReader("https://localhost/~jim/json/maleGivenNames.json");
-    final GenericStringStore store = new GenericStringStoreImpl(reader);
-    final String result = store.retrieve().getValue();
+    final Reader reader = new JsonInputStreamReader("https://localhost/~jim/json/fullNames.json");
+    final GenericMapStore store = new GenericMapStoreImpl(reader);
+    final String result = store.retrieve().getValue().get("firstName").toString();
+    logger.debug("result: {}", result);
     Assert.assertNotNull(result);
   }
 }
