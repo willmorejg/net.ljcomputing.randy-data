@@ -13,6 +13,7 @@ import net.ljcomputing.randy.factory.BuiltinStoresFactory;
 import net.ljcomputing.randy.model.impl.GenericMap;
 import net.ljcomputing.randy.model.impl.GenericString;
 import net.ljcomputing.randy.reader.Reader;
+import net.ljcomputing.randy.reader.impl.CsvInputStreamReader;
 import net.ljcomputing.randy.reader.impl.JsonInputStreamReader;
 import net.ljcomputing.randy.store.exception.StoreException;
 import net.ljcomputing.randy.store.impl.GenericMapStoreImpl;
@@ -156,5 +157,17 @@ public class StoreTest {
 
     logger.debug("result: {}", result);
     Assert.assertNull(result);
+  }
+
+  @Test
+  void testCsvStore() throws StoreException {
+    final Path path = Path.of(System.getProperty("user.dir"), "in", "worldCapitals.csv");
+    final Reader reader = new CsvInputStreamReader("file:" + path.toString());
+    final GenericMapStore store = new GenericMapStoreImpl(reader);
+    final GenericMap result = store.retrieve();
+    final Long id = result.getId();
+    final String country = result.getValue().get("Country").toString();
+    logger.debug("{} : {} [{}]", id, country, result);
+    Assert.assertNotNull(result);
   }
 }

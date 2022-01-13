@@ -47,7 +47,12 @@ public abstract class AbstractStore<M extends Model> implements Store<M> {
   public M mapToModel(final Map<String, Object> map, final Class<M> klass) throws StoreException {
     try {
       final M model = klass.getDeclaredConstructor().newInstance();
-      model.setId(Long.parseLong(map.get("id").toString()));
+
+      if (map.get("id") != null) {
+        final Object id = map.get("id");
+        model.setId(Long.parseLong(id.toString()));
+      }
+
       return model;
     } catch (InstantiationException
         | IllegalAccessException
