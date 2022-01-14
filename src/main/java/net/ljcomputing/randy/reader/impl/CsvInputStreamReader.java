@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import java.io.InputStream;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,10 +31,9 @@ public class CsvInputStreamReader extends AbstractReader implements Reader {
    */
   @Override
   public List<Map<String, Object>> resourceToListOfMaps() throws ReaderException {
-    final URI resource = URI.create(resourceDefinition);
-
     try (final InputStream storeFile =
-        ResourceFactory.getByScheme(resource.getScheme()).getInputStream(resource)) {
+        ResourceFactory.getByScheme(getResourceUri().getScheme())
+            .getInputStream(getResourceUri())) {
       return csvToList(storeFile);
     } catch (Exception e) {
       throw new ReaderException("Failed to retrieve resource into list of maps", e);
@@ -51,12 +49,11 @@ public class CsvInputStreamReader extends AbstractReader implements Reader {
    */
   protected List<Map<String, Object>> csvToList(final InputStream storeFile)
       throws ReaderException {
-    List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+    final List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+    final CsvSchema csvSchema = CsvSchema.emptySchema().withHeader().withColumnSeparator(',');
 
-    try {
-      final CsvSchema csvSchema = CsvSchema.emptySchema().withHeader().withColumnSeparator(',');
-      final MappingIterator<Map<String, Object>> it =
-          new CsvMapper().readerFor(Map.class).with(csvSchema).readValues(storeFile);
+    try (final MappingIterator<Map<String, Object>> it =
+        new CsvMapper().readerFor(Map.class).with(csvSchema).readValues(storeFile)) {
       int id = -1;
       while (it.hasNext()) {
         final Map<String, Object> map = new HashMap<>();

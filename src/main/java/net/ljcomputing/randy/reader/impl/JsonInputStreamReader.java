@@ -3,7 +3,6 @@ package net.ljcomputing.randy.reader.impl;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.InputStream;
-import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import net.ljcomputing.randy.factory.ResourceFactory;
@@ -33,10 +32,9 @@ public class JsonInputStreamReader extends AbstractReader implements Reader {
    */
   @Override
   public List<Map<String, Object>> resourceToListOfMaps() throws ReaderException {
-    final URI resource = URI.create(resourceDefinition);
-
     try (final InputStream storeFile =
-        ResourceFactory.getByScheme(resource.getScheme()).getInputStream(resource)) {
+        ResourceFactory.getByScheme(getResourceUri().getScheme())
+            .getInputStream(getResourceUri())) {
       return jsonToList(storeFile);
     } catch (Exception e) {
       throw new ReaderException("Failed to retrieve resource into list of maps", e);

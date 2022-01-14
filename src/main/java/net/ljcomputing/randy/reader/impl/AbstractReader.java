@@ -1,5 +1,6 @@
 package net.ljcomputing.randy.reader.impl;
 
+import java.net.URI;
 import net.ljcomputing.randy.reader.Reader;
 
 /** Abstract implementation of a resource reader. */
@@ -23,5 +24,14 @@ public abstract class AbstractReader implements Reader {
    */
   public AbstractReader(final String resourceDefinition) {
     this.resourceDefinition = resourceDefinition;
+  }
+
+  /**
+   * Get resource definition as a URI.
+   *
+   * @return the resource definition as a URI
+   */
+  protected URI getResourceUri() {
+    return URI.create(resourceDefinition);
   }
 }
