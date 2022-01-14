@@ -1,14 +1,23 @@
 package net.ljcomputing.randy.random;
 
 import java.security.SecureRandom;
-import org.apache.commons.lang3.RandomStringUtils;
 
 /** A random number generator. */
 public enum RandomGenerator {
   /** The instance. */
   INSTANCE;
 
+  /** The random generator. */
   private static final SecureRandom RANDOM = new SecureRandom();
+
+  /** A characters set. */
+  private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
+  /** All numbers set. */
+  private static final String NUMBERS = "0123456789";
+
+  /** All alphanumerics. */
+  private static final String ALPHA = NUMBERS + CHARACTERS + NUMBERS;
 
   /**
    * Returns a random number between 0 and the given max.
@@ -50,12 +59,43 @@ public enum RandomGenerator {
   }
 
   /**
-   * Returns a random alphanumeric string value no longer than the given length.
+   * Returns a random String value based on the pool of values provided and no longer than the given
+   * length.
+   *
+   * @param maxLength max length of String to return
+   * @param poolOfValues pool of values to use in String generation
+   * @return a random String
+   */
+  public static final String getRandomCharacters(
+      final Integer maxLength, final String poolOfValues) {
+    final StringBuilder builder = new StringBuilder();
+    final Integer length = getRandomInt(maxLength) + 1;
+
+    for (int i = 0; i < length; i++) {
+      final Integer position = getRandomInt(poolOfValues.length());
+      builder.append(poolOfValues.charAt(position));
+    }
+
+    return builder.toString();
+  }
+
+  /**
+   * Returns a random String of just characters no longer than the given length.
    *
    * @param maxLength the max length of the random string
    * @return the random string value
    */
-  public static final String getRandomString(final Integer maxLength) {
-    return RandomStringUtils.random(getRandomInt(maxLength), 0, 0, true, true, null, RANDOM);
+  public static final String getRandomAlphaCharacters(final Integer maxLength) {
+    return getRandomCharacters(maxLength, CHARACTERS);
+  }
+
+  /**
+   * Returns a random String of alphanumeric characters no longer than the given length.
+   *
+   * @param maxLength the max length of the random string
+   * @return the random string value
+   */
+  public static final String getRandomAlphaNumericCharacters(final Integer maxLength) {
+    return getRandomCharacters(maxLength, ALPHA);
   }
 }

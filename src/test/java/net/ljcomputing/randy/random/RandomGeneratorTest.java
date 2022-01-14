@@ -1,10 +1,14 @@
 package net.ljcomputing.randy.random;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 /** Test class for random generation. */
 public class RandomGeneratorTest {
+  /** The logger. */
+  private static final Logger logger = LoggerFactory.getLogger(RandomGeneratorTest.class);
 
   /** Test random int generation. */
   @Test
@@ -44,11 +48,25 @@ public class RandomGeneratorTest {
 
   /** Test String generation. */
   @Test
-  void testString() {
-    final String generated1 = RandomGenerator.getRandomString(12);
-    Assert.assertTrue(generated1 != null);
-    final String generated2 = RandomGenerator.getRandomString(12);
-    Assert.assertTrue(generated2 != null);
-    Assert.assertNotEquals(generated1, generated2);
+  void testStrings() {
+    for (int i = 0; i < 5; i++) {
+      final String generated1 = RandomGenerator.getRandomAlphaCharacters(12);
+      logger.debug("generated1: {}", generated1);
+      Assert.assertTrue(generated1 != null);
+      final String generated2 = RandomGenerator.getRandomAlphaCharacters(12);
+      logger.debug("generated2: {}", generated2);
+      Assert.assertTrue(generated2 != null);
+      Assert.assertNotEquals(generated1, generated2);
+    }
+
+    for (int i = 0; i < 5; i++) {
+      final String generated1 = RandomGenerator.getRandomAlphaNumericCharacters(12);
+      logger.debug("generated1: {}", generated1);
+      Assert.assertTrue(generated1 != null);
+      final String generated2 = RandomGenerator.getRandomAlphaNumericCharacters(12);
+      logger.debug("generated2: {}", generated2);
+      Assert.assertTrue(generated2 != null);
+      Assert.assertNotEquals(generated1, generated2);
+    }
   }
 }
