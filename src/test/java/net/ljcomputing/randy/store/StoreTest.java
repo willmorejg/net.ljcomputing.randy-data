@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import net.ljcomputing.randy.factory.BuiltinStoresFactory;
@@ -15,6 +16,7 @@ import net.ljcomputing.randy.model.impl.GenericMap;
 import net.ljcomputing.randy.model.impl.GenericString;
 import net.ljcomputing.randy.reader.Reader;
 import net.ljcomputing.randy.reader.impl.CsvInputStreamReader;
+import net.ljcomputing.randy.reader.impl.JdbcReader;
 import net.ljcomputing.randy.reader.impl.JsonInputStreamReader;
 import net.ljcomputing.randy.reader.impl.XmlInputStreamReader;
 import net.ljcomputing.randy.store.exception.StoreException;
@@ -202,6 +204,32 @@ public class StoreTest {
     final Reader reader = new XmlInputStreamReader("file:" + xmlPath.toString());
     final GenericMapStore store = new GenericMapStoreImpl(reader);
     final String result = store.retrieve().getValue().get("firstName").toString();
+    logger.debug("result: {}", result);
+    Assert.assertNotNull(result);
+  }
+
+  @Test
+  void testJdbcStore() throws StoreException {
+    final String resourceDefinition =
+        "jdbc:postgresql://localhost/osm2?user=jim&password=Wiomm$001";
+    String query =
+        "SELECT county_num \"id\", county_nam \"countyName\" FROM pa_roads.pacounty2020_01 p "
+            + "WHERE county_nam like ? ORDER BY county_nam";
+    final List<Object> parameters = new LinkedList<>();
+    parameters.add("Y%");
+
+    Reader reader = new JdbcReader(resourceDefinition, query, parameters);
+    GenericMapStore store = new GenericMapStoreImpl(reader);
+    String result = store.retrieve().getValue().get("countyName").toString();
+    logger.debug("result: {}", result);
+    Assert.assertNotNull(result);
+
+    query =
+        "SELECT county_num \"id\", county_nam \"countyName\" FROM pa_roads.pacounty2020_01 p "
+            + "ORDER BY county_nam";
+    reader = new JdbcReader(resourceDefinition, query);
+    store = new GenericMapStoreImpl(reader);
+    result = store.retrieve().getValue().get("countyName").toString();
     logger.debug("result: {}", result);
     Assert.assertNotNull(result);
   }
