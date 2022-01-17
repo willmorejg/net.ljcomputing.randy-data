@@ -211,7 +211,7 @@ public class StoreTest {
   @Test
   void testJdbcStore() throws StoreException {
     final String resourceDefinition =
-        "jdbc:postgresql://localhost/osm2?user=jim&password=Wiomm$001";
+        "jdbc:postgresql://localhost/osm2?user=<username>&password=<password>>";
     String query =
         "SELECT county_num \"id\", county_nam \"countyName\" FROM pa_roads.pacounty2020_01 p "
             + "WHERE county_nam like ? ORDER BY county_nam";
