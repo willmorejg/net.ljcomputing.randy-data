@@ -3,6 +3,7 @@ package net.ljcomputing.randy.store;
 import com.fasterxml.jackson.core.exc.StreamWriteException;
 import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ import net.ljcomputing.randy.model.impl.GenericString;
 import net.ljcomputing.randy.reader.Reader;
 import net.ljcomputing.randy.reader.impl.CsvInputStreamReader;
 import net.ljcomputing.randy.reader.impl.JsonInputStreamReader;
+import net.ljcomputing.randy.reader.impl.XmlInputStreamReader;
 import net.ljcomputing.randy.store.exception.StoreException;
 import net.ljcomputing.randy.store.impl.GenericMapStoreImpl;
 import net.ljcomputing.randy.store.impl.GenericStringStoreImpl;
@@ -74,7 +76,8 @@ public class StoreTest {
   void testGenericMapStore()
       throws StoreException, StreamWriteException, DatabindException, IOException {
     final BuiltinStoresFactory factory = new BuiltinStoresFactory();
-    final Path path = Path.of(System.getProperty("user.dir"), "out", "fullNames.json");
+    final Path path = Path.of(System.getProperty("user.dir"), "out");
+    final Path jsonPath = Path.of(path.toString(), "fullNames.json");
 
     final List<GenericMap> list = new ArrayList<>();
     for (int i = 0; i < 100; i++) {
@@ -90,9 +93,9 @@ public class StoreTest {
       list.add(model);
     }
 
-    new ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(path.toFile(), list);
+    new ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(jsonPath.toFile(), list);
 
-    final Reader reader = new JsonInputStreamReader("file:" + path.toString());
+    final Reader reader = new JsonInputStreamReader("file:" + jsonPath.toString());
     final GenericMapStore store = new GenericMapStoreImpl(reader);
     final String result = store.retrieve().getValue().get("firstName").toString();
     logger.debug("result: {}", result);
@@ -168,6 +171,38 @@ public class StoreTest {
     final Long id = result.getId();
     final String country = result.getValue().get("Country").toString();
     logger.debug("{} : {} [{}]", id, country, result);
+    Assert.assertNotNull(result);
+  }
+
+  @Test
+  void testXmlStore() throws StreamWriteException, DatabindException, IOException, StoreException {
+    final BuiltinStoresFactory factory = new BuiltinStoresFactory();
+    final Path path = Path.of(System.getProperty("user.dir"), "out");
+    final Path xmlPath = Path.of(path.toString(), "fullNames.xml");
+
+    final List<GenericMap> list = new ArrayList<>();
+    for (int i = 0; i < 100; i++) {
+      final GenericMap model = new GenericMap();
+      final Map<String, Object> map = new HashMap<>();
+      final String firstName =
+          ((GenericString) factory.getStore("maleGivenNames").retrieve()).getValue();
+      final String lastName = ((GenericString) factory.getStore("surnames").retrieve()).getValue();
+      model.setId((long) i);
+      map.put("firstName", firstName);
+      map.put("lastName", lastName);
+      model.setValue(map);
+      list.add(model);
+    }
+
+    new XmlMapper()
+        .writerWithDefaultPrettyPrinter()
+        .withRootName("fullNames")
+        .writeValue(xmlPath.toFile(), list);
+
+    final Reader reader = new XmlInputStreamReader("file:" + xmlPath.toString());
+    final GenericMapStore store = new GenericMapStoreImpl(reader);
+    final String result = store.retrieve().getValue().get("firstName").toString();
+    logger.debug("result: {}", result);
     Assert.assertNotNull(result);
   }
 }

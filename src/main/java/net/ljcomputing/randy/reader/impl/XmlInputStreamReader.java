@@ -1,25 +1,26 @@
 package net.ljcomputing.randy.reader.impl;
 
-import com.fasterxml.jackson.databind.MappingIterator;
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import net.ljcomputing.randy.factory.ResourceFactory;
 import net.ljcomputing.randy.reader.Reader;
 import net.ljcomputing.randy.reader.exception.ReaderException;
 
-/** CSV input stream reader implementation. */
-public class CsvInputStreamReader extends AbstractReader implements Reader {
+/** XML input stream reader implementation. */
+public class XmlInputStreamReader extends AbstractReader implements Reader {
+  /** The Jackson type reference definition. */
+  public static final TypeReference<List<Map<String, Object>>> TYPE_REF =
+      new TypeReference<List<Map<String, Object>>>() {};
+
   /**
    * Constructor.
    *
    * @param resourceDefinition the definition of the resource
    */
-  public CsvInputStreamReader(final String resourceDefinition) {
+  public XmlInputStreamReader(final String resourceDefinition) {
     super(resourceDefinition);
   }
 
@@ -34,7 +35,7 @@ public class CsvInputStreamReader extends AbstractReader implements Reader {
     try (final InputStream storeFile =
         ResourceFactory.getByScheme(getResourceUri().getScheme())
             .getInputStream(getResourceUri())) {
-      return csvToList(storeFile);
+      return jsonToList(storeFile);
     } catch (Exception e) {
       throw new ReaderException("Failed to retrieve resource into list of maps", e);
     }
@@ -47,25 +48,12 @@ public class CsvInputStreamReader extends AbstractReader implements Reader {
    * @return a List of Map values
    * @throws ReaderException ReaderException
    */
-  protected List<Map<String, Object>> csvToList(final InputStream storeFile)
+  protected List<Map<String, Object>> jsonToList(final InputStream storeFile)
       throws ReaderException {
-    final List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
-    final CsvSchema csvSchema =
-        CsvSchema.emptySchema().withHeader().withColumnSeparator(',').withQuoteChar('"');
-
-    try (final MappingIterator<Map<String, Object>> it =
-        new CsvMapper().readerFor(Map.class).with(csvSchema).readValues(storeFile)) {
-      int id = -1;
-      while (it.hasNext()) {
-        final Map<String, Object> map = new HashMap<>();
-        map.put("id", Integer.toString(++id));
-        map.put("value", it.next());
-        list.add(map);
-      }
+    try {
+      return new XmlMapper().readValue(storeFile, TYPE_REF);
     } catch (Exception e) {
-      throw new ReaderException("Failed to convert CSV to List: ", e);
+      throw new ReaderException("Failed to convert JSON to List: ", e);
     }
-
-    return list;
   }
 }
