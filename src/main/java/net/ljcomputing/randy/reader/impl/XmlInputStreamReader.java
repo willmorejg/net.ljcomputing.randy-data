@@ -35,7 +35,7 @@ public class XmlInputStreamReader extends AbstractReader implements Reader {
     try (final InputStream storeFile =
         ResourceFactory.getByScheme(getResourceUri().getScheme())
             .getInputStream(getResourceUri())) {
-      return jsonToList(storeFile);
+      return xmlToList(storeFile);
     } catch (Exception e) {
       throw new ReaderException("Failed to retrieve resource into list of maps", e);
     }
@@ -48,7 +48,7 @@ public class XmlInputStreamReader extends AbstractReader implements Reader {
    * @return a List of Map values
    * @throws ReaderException ReaderException
    */
-  protected List<Map<String, Object>> jsonToList(final InputStream storeFile)
+  protected List<Map<String, Object>> xmlToList(final InputStream storeFile)
       throws ReaderException {
     try {
       return new XmlMapper().readValue(storeFile, TYPE_REF);
