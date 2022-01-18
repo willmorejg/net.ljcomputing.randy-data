@@ -157,7 +157,7 @@ pmdMain {
 
 ossIndexAudit {
     username = 'willmorejg@gmail.com'
-    password = 'Wiomm$001'
+    password = '<password>'
     allConfigurations = false
     useCache = true
     cacheExpiration = 'PT12H'
