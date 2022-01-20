@@ -28,7 +28,7 @@ Randy data provides a way to generate random data for unit testing.
     // retrieve a store by name
     final GenericStringStore store = (GenericStringStore) factory.getStore("femaleGivenNames");
     // retrieve a random value from the store
-    final String randomValue = store.retrieve().getValue());
+    final String randomValue = store.retrieve().getValue();
 ```
 
 **Stores**
