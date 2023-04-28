@@ -12,6 +12,4 @@ public interface ResourceStream {
    * @return the InputStream for the resource
    */
   InputStream getInputStream(URI resource);
-
-  
 }
